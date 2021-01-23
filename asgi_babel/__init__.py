@@ -21,8 +21,7 @@ current_locale = ContextVar('locale', default=None)
 BABEL = None
 
 
-def select_locale_by_request(
-        request: Request, default: str = 'en', locales: t.Sequence[str] = None) -> str:
+async def select_locale_by_request(request: Request, default: str = 'en') -> str:
     """Select a locale by the given request."""
     locale_header = request.headers.get('accept-language')
     if not locale_header:
@@ -44,7 +43,7 @@ class BabelMiddleware(BaseMiddeware):
     default_locale: str = 'en'
     domain: str = 'messages'
     locales_dirs: t.List[str] = field(default_factory=lambda: ['locales'])
-    locale_selector: t.Callable[[Request, str], str] = field(
+    locale_selector: t.Callable[[Request, str], t.Awaitable[str]] = field(
         repr=False, default=select_locale_by_request)
 
     translations: t.Dict[t.Tuple[str, str], support.Translations] = field(
@@ -61,7 +60,8 @@ class BabelMiddleware(BaseMiddeware):
         else:
             request = scope.get('request') or Request(scope)
 
-        locale = Locale.parse(self.locale_selector(request, self.default_locale))  # type: ignore
+        lang = await self.locale_selector(request, self.default_locale)  # type: ignore
+        locale = Locale.parse(lang)
         current_locale.set(locale)
 
         return await self.app(scope, receive, send)  # type: ignore

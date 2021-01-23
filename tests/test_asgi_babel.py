@@ -24,13 +24,13 @@ def app():
     return app
 
 
-def test_select_locale_by_request():
+async def test_select_locale_by_request():
     from asgi_babel import select_locale_by_request
     scope = {'headers': [(
         b'accept-language', b'fr-CH, fr;q=0.9, en;q=0.8, de;q=0.7, *;q=0.5')]}
     request = tools.Request(scope)
-    locale = select_locale_by_request(request)
-    assert locale == 'fr'
+    lang = await select_locale_by_request(request)
+    assert lang == 'fr'
 
 
 async def test_setup():

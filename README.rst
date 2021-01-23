@@ -105,7 +105,7 @@ The middleware's options with default values:
         # A path to find translations
         locales_dirs=['locales']
 
-        # A function with type: typing.Callable[[asgi_tools.Request, str]
+        # A function with type: typing.Callable[[asgi_tools.Request, typing.Coroutine[typing.Any, typing.Any, str]
         # which takes a request and default locale and return current locale
         locale_selector=asgi_babel.select_locale_by_request,
 
