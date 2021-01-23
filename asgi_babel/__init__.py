@@ -44,7 +44,8 @@ class BabelMiddleware(BaseMiddeware):
     default_locale: str = 'en'
     domain: str = 'messages'
     locales_dirs: t.List[str] = field(default_factory=lambda: ['locales'])
-    locale_selector_fn: t.Callable = field(repr=False, default=select_locale_by_request)
+    locale_selector: t.Callable[[Request, str], str] = field(
+        repr=False, default=select_locale_by_request)
 
     translations: t.Dict[t.Tuple[str, str], support.Translations] = field(
         init=False, repr=False, default_factory=lambda: {})
@@ -60,15 +61,10 @@ class BabelMiddleware(BaseMiddeware):
         else:
             request = scope.get('request') or Request(scope)
 
-        locale = Locale.parse(self.locale_selector_fn(request))
+        locale = Locale.parse(self.locale_selector(request, self.default_locale))  # type: ignore
         current_locale.set(locale)
 
         return await self.app(scope, receive, send)  # type: ignore
-
-    def locale_selector(self, fn: t.Callable[[Request, str], str]) -> t.Callable:
-        """Define locale selector."""
-        self.locale_selector_fn = fn  # type: ignore
-        return fn
 
 
 def get_translations(domain: str = None, locale: Locale = None) -> support.Translations:
