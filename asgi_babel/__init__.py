@@ -5,10 +5,10 @@ __license__ = "MIT"
 
 import re
 import typing as t
-from babel import Locale, support  # type: ignore
+from babel import Locale, support
 from asgi_tools import Request
-from asgi_tools.middleware import BaseMiddeware
-from asgi_tools.types import ASGIApp, Scope, Receive, Send
+from asgi_tools.middleware import BaseMiddeware, ASGIApp
+from asgi_tools.types import Scope, Receive, Send
 from dataclasses import dataclass, field
 from contextvars import ContextVar
 
