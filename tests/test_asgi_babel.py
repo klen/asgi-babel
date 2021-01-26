@@ -55,18 +55,18 @@ async def test_middleware(app):
     client = ASGITestClient(babel)
 
     res = await client.get('/locale')
-    assert res.text == 'en'
+    assert await res.text() == 'en'
 
     res = await client.get(
         '/locale', headers={'accept-language': 'fr-CH, fr;q=0.9, en;q=0.8, de;q=0.7, *;q=0.5'})
-    assert res.text == 'fr'
+    assert await res.text() == 'fr'
 
     res = await client.get('/hello')
-    assert res.text == 'Hello World!'
+    assert await res.text() == 'Hello World!'
 
     res = await client.get(
         '/hello', headers={'accept-language': 'fr-CH, fr;q=0.9, en;q=0.8, de;q=0.7, *;q=0.5'})
-    assert res.text == 'Bonjour le monde!'
+    assert await res.text() == 'Bonjour le monde!'
 
 
 async def test_readme(app):
@@ -78,17 +78,18 @@ async def test_readme(app):
         hello_world = gettext('Hello World!').encode()
 
         await send({"type": "http.response.start", "status": 200})
-        await send({"type": "http.response.body", "body": b"Current locale is %s\n" % locale})
+        await send({"type": "http.response.body", "body": b"Current locale is %s\n" % locale,
+                    "more_body": True})
         await send({"type": "http.response.body", "body": hello_world})
 
     app = BabelMiddleware(my_app, locales_dirs=['tests/locales'])
     client = ASGITestClient(app)
 
     res = await client.get('/')
-    assert res.text == 'Current locale is en\nHello World!'
+    assert await res.text() == 'Current locale is en\nHello World!'
 
     res = await client.get('/', headers={'accept-language': 'fr-CH, fr;q=0.9'})
-    assert res.text == 'Current locale is fr\nBonjour le monde!'
+    assert await res.text() == 'Current locale is fr\nBonjour le monde!'
 
     app = tools.App()
     app.middleware(BabelMiddleware.setup(locales_dirs=['tests/locales']))
@@ -104,7 +105,7 @@ async def test_readme(app):
     client = ASGITestClient(app)
 
     res = await client.get('/')
-    assert res.text == 'Hello World!'
+    assert await res.text() == 'Hello World!'
 
     res = await client.get('/', headers={'accept-language': 'fr-CH, fr;q=0.9'})
-    assert res.text == 'Bonjour le monde!'
+    assert await res.text() == 'Bonjour le monde!'
