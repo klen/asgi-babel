@@ -15,6 +15,10 @@ ASGI-Babel
     :target: https://pypi.org/project/asgi-babel/
     :alt: PYPI Version
 
+.. image:: https://img.shields.io/pypi/pyversions/asgi-babel
+    :target: https://pypi.org/project/asgi-babel/
+    :alt: Python Versions
+
 .. _contents:
 
 .. contents::
