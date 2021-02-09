@@ -1,4 +1,4 @@
-"""A simple websockets example for ASGI-Tools.
+"""A simple i18n example (en/fr).
 
 To run the example install any ASGI server (uvicorn/hypercorn/etc):
 
