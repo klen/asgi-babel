@@ -26,11 +26,15 @@ def app():
 
 async def test_select_locale_by_request():
     from asgi_babel import select_locale_by_request
-    scope = {'headers': [(
-        b'accept-language', b'fr-CH, fr;q=0.9, en;q=0.8, de;q=0.7, *;q=0.5')]}
-    request = tools.Request(scope)
+    request = tools.Request({'headers': [(
+        b'accept-language', b'fr-CH, fr;q=0.9, en;q=0.8, de;q=0.7, *;q=0.5')]})
     lang = await select_locale_by_request(request)
-    assert lang == 'fr'
+    assert lang == 'fr-CH'
+
+    request = tools.Request({'headers': [(
+        b'accept-language', b'en-US,en;q=0.9,ru;q=0.8,ru-RU;q=0.7')]})
+    lang = await select_locale_by_request(request)
+    assert lang == 'en-US'
 
 
 async def test_setup():
@@ -51,7 +55,7 @@ async def test_middleware(app):
     async def hello(request):
         return gettext('Hello World!')
 
-    babel = BabelMiddleware(app, locales_dirs=['tests/locales'])
+    babel = BabelMiddleware(app, locales_dirs=['example/locales'])
     client = ASGITestClient(babel)
 
     res = await client.get('/locale')
@@ -59,7 +63,7 @@ async def test_middleware(app):
 
     res = await client.get(
         '/locale', headers={'accept-language': 'fr-CH, fr;q=0.9, en;q=0.8, de;q=0.7, *;q=0.5'})
-    assert await res.text() == 'fr'
+    assert await res.text() == 'fr_CH'
 
     res = await client.get('/hello')
     assert await res.text() == 'Hello World!'
@@ -82,7 +86,7 @@ async def test_readme(app):
                     "more_body": True})
         await send({"type": "http.response.body", "body": hello_world})
 
-    app = BabelMiddleware(my_app, locales_dirs=['tests/locales'])
+    app = BabelMiddleware(my_app, locales_dirs=['example/locales'])
     client = ASGITestClient(app)
 
     res = await client.get('/')
@@ -92,7 +96,7 @@ async def test_readme(app):
     assert await res.text() == 'Current locale is fr\nBonjour le monde!'
 
     app = tools.App()
-    app.middleware(BabelMiddleware.setup(locales_dirs=['tests/locales']))
+    app.middleware(BabelMiddleware.setup(locales_dirs=['example/locales']))
 
     @app.route('/')
     async def index(request):

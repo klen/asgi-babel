@@ -75,7 +75,7 @@ As `ASGI-Tools`_ Internal middleware
 .. code:: python
 
     from asgi_tools import App
-    from asgi_babel import BabelMiddleware
+    from asgi_babel import BabelMiddleware, gettext
 
     app = App()
     app.middleware(BabelMiddleware.setup(locales_dirs=['tests/locales']))

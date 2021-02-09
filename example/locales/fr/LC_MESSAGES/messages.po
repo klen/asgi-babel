@@ -1,4 +1,4 @@
-# French translations for PROJECT.
+# Translations template for PROJECT.
 # Copyright (C) 2021 ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
@@ -7,17 +7,19 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-01-22 19:51+0300\n"
-"PO-Revision-Date: 2021-01-22 19:51+0300\n"
+"POT-Creation-Date: 2021-02-09 20:45+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language: fr\n"
-"Language-Team: fr <LL@li.org>\n"
-"Plural-Forms: nplurals=2; plural=(n > 1)\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.9.0\n"
 
-#: tests/test_asgi_babel.py:52
+#: example/__init__.py:20
 msgid "Hello World!"
 msgstr "Bonjour le monde!"
+
+#: example/__init__.py:21
+msgid "Locale information:"
+msgstr "Informations locales:"

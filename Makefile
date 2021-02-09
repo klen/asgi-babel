@@ -4,7 +4,7 @@ all: $(VIRTUAL_ENV)
 
 $(VIRTUAL_ENV): setup.cfg
 	@[ -d $(VIRTUAL_ENV) ] || python -m venv $(VIRTUAL_ENV)
-	@$(VIRTUAL_ENV)/bin/pip install -e .[tests,build]
+	@$(VIRTUAL_ENV)/bin/pip install -e .[tests,build,example]
 	@touch $(VIRTUAL_ENV)
 
 VERSION	?= minor
@@ -60,11 +60,12 @@ mypy: $(VIRTUAL_ENV)
 	$(VIRTUAL_ENV)/bin/mypy asgi_babel
 
 
+.PHONY: example
 example: $(VIRTUAL_ENV)
 	$(VIRTUAL_ENV)/bin/uvicorn --reload --port 5000 example:app
 
 messages: $(VIRTUAL_ENV)
-	# $(VIRTUAL_ENV)/bin/pybabel extract tests -o locale-fr.pot
-	# $(VIRTUAL_ENV)/bin/pybabel init -l fr -d tests/locales -i locale-fr.pot
-	$(VIRTUAL_ENV)/bin/pybabel compile -d tests/locales
+	# $(VIRTUAL_ENV)/bin/pybabel extract example -o locale-fr.pot
+	# $(VIRTUAL_ENV)/bin/pybabel init -l fr -d example/locales -i locale-fr.pot
+	$(VIRTUAL_ENV)/bin/pybabel compile -d example/locales
 

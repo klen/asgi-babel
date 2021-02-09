@@ -28,8 +28,7 @@ async def select_locale_by_request(request: Request, default: str = 'en') -> str
     if not locale_header:
         return default
 
-    ulocales = [(q, locale_delim_re.split(v)[0]) for v, q in parse_accept_header(locale_header)]
-
+    ulocales = list(parse_accept_header(locale_header))
     if not ulocales:
         return default
 
@@ -62,7 +61,7 @@ class BabelMiddleware(BaseMiddeware):
             request = scope.get('request') or Request(scope)
 
         lang = await self.locale_selector(request, self.default_locale)  # type: ignore
-        locale = Locale.parse(lang)
+        locale = Locale.parse(lang, sep='-')
         current_locale.set(locale)
 
         return await self.app(scope, receive, send)  # type: ignore
@@ -92,13 +91,13 @@ def get_translations(domain: str = None, locale: Locale = None) -> support.Trans
     return BABEL.translations[(domain, locale.language)]
 
 
-def gettext(string, domain=None, **variables):
+def gettext(string: str, domain: str = None, **variables):
     """Translate a string with the current locale."""
     t = get_translations(domain)
     return t.ugettext(string) % variables
 
 
-def ngettext(singular, plural, num, domain=None, **variables):
+def ngettext(singular: str, plural: str, num: int, domain: str = None, **variables):
     """Translate a string wity the current locale.
 
     The `num` parameter is used to dispatch between singular and various plural forms of the
@@ -110,27 +109,32 @@ def ngettext(singular, plural, num, domain=None, **variables):
     return t.ungettext(singular, plural, num) % variables
 
 
-def pgettext(context, string, domain=None, **variables):
+def pgettext(context: str, string: str, domain: str = None, **variables):
     """Like :meth:`gettext` but with a context."""
     t = get_translations(domain)
     return t.upgettext(context, string) % variables
 
 
-def npgettext(context, singular, plural, num, domain=None, **variables):
+def npgettext(context: str, singular: str, plural: str, num: int, domain: str = None, **variables):
     """Like :meth:`ngettext` but with a context."""
     variables.setdefault('num', num)
     t = get_translations(domain)
     return t.unpgettext(context, singular, plural, num) % variables
 
 
-def parse_accept_header(header: str) -> t.Iterator[t.Tuple[str, float]]:
+def parse_accept_header(header: str) -> t.Iterator[t.Tuple[float, str]]:
     """Parse accept headers."""
     result = []
     for match in accept_re.finditer(header):
         quality = 1.0
-        if match.group(2):
-            quality = max(min(float(match.group(2)), 1), 0)
-        result.append((match.group(1), quality))
+        try:
+            if match.group(2):
+                quality = max(min(float(match.group(2)), 1), 0)
+            if match.group(1) == '*':
+                continue
+        except ValueError:
+            continue
+        result.append((quality, match.group(1)))
 
     return reversed(sorted(result))
 
