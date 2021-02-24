@@ -3,7 +3,7 @@ ASGI-Babel
 
 .. _description:
 
-**asgi-babel** -- Adds internationalization (i18n) support to ASGI applications (Asyncio_ / Trio_)
+**asgi-babel** -- Adds internationalization (i18n) support to ASGI applications (Asyncio_ / Trio_ / Curio_)
 
 .. _badges:
 
@@ -89,6 +89,20 @@ As `ASGI-Tools`_ Internal middleware
         return current_locale.get().language
 
 
+Usage with Curio async library
+------------------------------
+
+The `asgi-babel` uses context variable to set current locale.  To enable the
+context variables with curio you have to run Curio_ with ``contextvars``
+support: 
+
+.. code-block:: python
+
+   from curio.task import ContextTask
+
+   curio.run(main, taskcls=ContextTask)
+
+
 Options
 ========
 
@@ -151,6 +165,7 @@ Licensed under a `MIT license`_.
 
 .. _ASGI-Tools: https://github.com/klen/asgi-tools
 .. _Asyncio: https://docs.python.org/3/library/asyncio.html
+.. _Curio: https://curio.readthedocs.io/en/latest/
 .. _MIT license: http://opensource.org/licenses/MIT
 .. _Trio: https://trio.readthedocs.io/en/stable/
 .. _klen: https://github.com/klen
