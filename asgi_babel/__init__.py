@@ -10,7 +10,7 @@ from asgi_tools.middleware import BaseMiddeware, ASGIApp
 from babel import Locale, support
 
 
-__version__ = "0.5.1"
+__version__ = "0.6.0"
 __license__ = "MIT"
 
 
