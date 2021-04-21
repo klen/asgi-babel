@@ -45,12 +45,6 @@ clean:
 register:
 	@python setup.py register
 
-.PHONY: upload
-# target: upload - Upload module on PyPi
-upload: clean $(VIRTUAL_ENV)
-	@$(VIRTUAL_ENV)/bin/python setup.py bdist_wheel
-	@$(VIRTUAL_ENV)/bin/twine upload dist/*
-
 
 test t: $(VIRTUAL_ENV)
 	$(VIRTUAL_ENV)/bin/pytest tests
