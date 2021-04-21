@@ -5,8 +5,8 @@ from contextvars import ContextVar
 from dataclasses import dataclass, field
 
 from asgi_tools import Request
-from asgi_tools._types import Scope, Receive, Send
 from asgi_tools.middleware import BaseMiddeware, ASGIApp
+from asgi_tools.typing import Scope, Receive, Send
 from babel import Locale, support
 
 
