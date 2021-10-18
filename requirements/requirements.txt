@@ -1,0 +1,2 @@
+asgi-tools      >= 0.47.9
+babel
