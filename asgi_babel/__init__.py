@@ -10,7 +10,7 @@ from asgi_tools.typing import Scope, Receive, Send
 from babel import Locale, support
 
 
-__version__ = "0.6.2"
+__version__ = "0.7.0"
 __license__ = "MIT"
 
 
