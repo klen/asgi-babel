@@ -5,26 +5,33 @@ from contextvars import ContextVar
 from dataclasses import dataclass, field
 
 from asgi_tools import Request
-from asgi_tools.middleware import BaseMiddeware, ASGIApp
-from asgi_tools.typing import Scope, Receive, Send
-from babel import Locale, support
+from asgi_tools.middleware import ASGIApp, BaseMiddeware
+from asgi_tools.typing import Receive, Scope, Send
 
+from babel import Locale, support
 
 __version__ = "0.7.0"
 __license__ = "MIT"
 
 
-__all__ = 'current_locale', 'BabelMiddleware', 'get_translations', \
-    'gettext', 'ngettext', 'pgettext', 'npgettext'
+__all__ = (
+    "current_locale",
+    "BabelMiddleware",
+    "get_translations",
+    "gettext",
+    "ngettext",
+    "pgettext",
+    "npgettext",
+)
 
 
-current_locale = ContextVar('locale', default=None)
+current_locale = ContextVar("locale", default=None)
 BABEL = None
 
 
 async def select_locale_by_request(request: Request) -> t.Optional[str]:
     """Select a locale by the given request."""
-    locale_header = request.headers.get('accept-language')
+    locale_header = request.headers.get("accept-language")
     if locale_header:
         ulocales = list(parse_accept_header(locale_header))
         if ulocales:
@@ -37,14 +44,16 @@ class BabelMiddleware(BaseMiddeware):
     """Support i18n."""
 
     app: ASGIApp
-    default_locale: str = 'en'
-    domain: str = 'messages'
-    locales_dirs: t.List[str] = field(default_factory=lambda: ['locales'])
+    default_locale: str = "en"
+    domain: str = "messages"
+    locales_dirs: t.List[str] = field(default_factory=lambda: ["locales"])
     locale_selector: t.Callable[[Request], t.Awaitable[t.Optional[str]]] = field(
-        repr=False, default=select_locale_by_request)
+        repr=False, default=select_locale_by_request
+    )
 
     translations: t.Dict[t.Tuple[str, str], support.Translations] = field(
-        init=False, repr=False, default_factory=lambda: {})
+        init=False, repr=False, default_factory=lambda: {}
+    )
 
     def __post_init__(self):
         global BABEL
@@ -55,10 +64,10 @@ class BabelMiddleware(BaseMiddeware):
         if isinstance(scope, Request):
             request = scope
         else:
-            request = scope.get('request') or Request(scope)
+            request = scope.get("request") or Request(scope)
 
         lang = await self.locale_selector(request) or self.default_locale  # type: ignore
-        locale = Locale.parse(lang, sep='-')
+        locale = Locale.parse(lang, sep="-")
         current_locale.set(locale)
 
         return await self.app(scope, receive, send)  # type: ignore
@@ -67,7 +76,7 @@ class BabelMiddleware(BaseMiddeware):
 def get_translations(domain: str = None, locale: Locale = None) -> support.Translations:
     """Load and cache translations."""
     if BABEL is None:
-        raise RuntimeError('BabelMiddleware is not inited.')
+        raise RuntimeError("BabelMiddleware is not inited.")
 
     locale = locale or current_locale.get()
     if not locale:
@@ -101,7 +110,7 @@ def ngettext(singular: str, plural: str, num: int, domain: str = None, **variabl
     message.
 
     """
-    variables.setdefault('num', num)
+    variables.setdefault("num", num)
     t = get_translations(domain)
     return t.ungettext(singular, plural, num) % variables
 
@@ -112,9 +121,11 @@ def pgettext(context: str, string: str, domain: str = None, **variables):
     return t.upgettext(context, string) % variables
 
 
-def npgettext(context: str, singular: str, plural: str, num: int, domain: str = None, **variables):
+def npgettext(
+    context: str, singular: str, plural: str, num: int, domain: str = None, **variables
+):
     """Like :meth:`ngettext` but with a context."""
-    variables.setdefault('num', num)
+    variables.setdefault("num", num)
     t = get_translations(domain)
     return t.unpgettext(context, singular, plural, num) % variables
 
@@ -127,7 +138,7 @@ def parse_accept_header(header: str) -> t.Iterator[t.Tuple[float, str]]:
         try:
             if match.group(2):
                 quality = max(min(float(match.group(2)), 1), 0)
-            if match.group(1) == '*':
+            if match.group(1) == "*":
                 continue
         except ValueError:
             continue
@@ -136,9 +147,9 @@ def parse_accept_header(header: str) -> t.Iterator[t.Tuple[float, str]]:
     return reversed(sorted(result))
 
 
-locale_delim_re = re.compile(r'[_-]')
+locale_delim_re = re.compile(r"[_-]")
 accept_re = re.compile(
-    r'''(                         # media-range capturing-parenthesis
+    r"""(                         # media-range capturing-parenthesis
             [^\s;,]+              # type/subtype
             (?:[ \t]*;[ \t]*      # ";"
             (?:                   # parameter non-capturing-parenthesis
@@ -152,4 +163,6 @@ accept_re = re.compile(
             (\d*(?:\.\d+)?)       # qvalue capturing-parentheses
             [^,]*                 # "extension" accept params: who cares?
         )?                        # accept params are optional
-    ''', re.VERBOSE)
+    """,
+    re.VERBOSE,
+)
