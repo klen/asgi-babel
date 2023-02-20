@@ -10,7 +10,7 @@ from asgi_tools.types import TASGIApp, TASGIReceive, TASGIScope, TASGISend
 
 from babel import Locale, support
 
-__version__ = "0.8.0"
+__version__ = "0.8.1"
 __license__ = "MIT"
 
 
