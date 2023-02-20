@@ -1,12 +1,12 @@
 """Support cookie-encrypted sessions for ASGI applications."""
 import re
-import typing as t
 from contextvars import ContextVar
 from dataclasses import dataclass, field
+from typing import Awaitable, Callable, Dict, Iterator, List, Optional, Tuple
 
 from asgi_tools import Request
-from asgi_tools.middleware import ASGIApp, BaseMiddeware
-from asgi_tools.typing import Receive, Scope, Send
+from asgi_tools.middleware import BaseMiddeware
+from asgi_tools.types import TASGIApp, TASGIReceive, TASGIScope, TASGISend
 
 from babel import Locale, support
 
@@ -29,13 +29,14 @@ current_locale = ContextVar("locale", default=None)
 BABEL = None
 
 
-async def select_locale_by_request(request: Request) -> t.Optional[str]:
+async def select_locale_by_request(request: Request) -> Optional[str]:
     """Select a locale by the given request."""
     locale_header = request.headers.get("accept-language")
     if locale_header:
         ulocales = list(parse_accept_header(locale_header))
         if ulocales:
             return ulocales[0][1]
+
     return None
 
 
@@ -43,15 +44,15 @@ async def select_locale_by_request(request: Request) -> t.Optional[str]:
 class BabelMiddleware(BaseMiddeware):
     """Support i18n."""
 
-    app: ASGIApp
+    app: TASGIApp
     default_locale: str = "en"
     domain: str = "messages"
-    locales_dirs: t.List[str] = field(default_factory=lambda: ["locales"])
-    locale_selector: t.Callable[[Request], t.Awaitable[t.Optional[str]]] = field(
+    locales_dirs: List[str] = field(default_factory=lambda: ["locales"])
+    locale_selector: Callable[[Request], Awaitable[Optional[str]]] = field(
         repr=False, default=select_locale_by_request
     )
 
-    translations: t.Dict[t.Tuple[str, str], support.Translations] = field(
+    translations: Dict[Tuple[str, str], support.Translations] = field(
         init=False, repr=False, default_factory=lambda: {}
     )
 
@@ -59,21 +60,25 @@ class BabelMiddleware(BaseMiddeware):
         global BABEL
         BABEL = self
 
-    async def __process__(self, scope: Scope, receive: Receive, send: Send):
+    async def __process__(
+        self, scope: TASGIScope, receive: TASGIReceive, send: TASGISend
+    ):
         """Load/save the sessions."""
         if isinstance(scope, Request):
             request = scope
         else:
-            request = scope.get("request") or Request(scope)
+            request = scope.get("request") or Request(scope, receive, send)
 
-        lang = await self.locale_selector(request) or self.default_locale  # type: ignore
+        lang = await self.locale_selector(request) or self.default_locale
         locale = Locale.parse(lang, sep="-")
         current_locale.set(locale)
 
-        return await self.app(scope, receive, send)  # type: ignore
+        return await self.app(scope, receive, send)
 
 
-def get_translations(domain: str = None, locale: Locale = None) -> support.Translations:
+def get_translations(
+    domain: Optional[str] = None, locale: Optional[Locale] = None
+) -> support.Translations:
     """Load and cache translations."""
     if BABEL is None:
         raise RuntimeError("BabelMiddleware is not inited.")
@@ -97,13 +102,15 @@ def get_translations(domain: str = None, locale: Locale = None) -> support.Trans
     return BABEL.translations[(domain, locale.language)]
 
 
-def gettext(string: str, domain: str = None, **variables):
+def gettext(string: str, domain: Optional[str] = None, **variables):
     """Translate a string with the current locale."""
     t = get_translations(domain)
     return t.ugettext(string) % variables
 
 
-def ngettext(singular: str, plural: str, num: int, domain: str = None, **variables):
+def ngettext(
+    singular: str, plural: str, num: int, domain: Optional[str] = None, **variables
+):
     """Translate a string wity the current locale.
 
     The `num` parameter is used to dispatch between singular and various plural forms of the
@@ -115,14 +122,19 @@ def ngettext(singular: str, plural: str, num: int, domain: str = None, **variabl
     return t.ungettext(singular, plural, num) % variables
 
 
-def pgettext(context: str, string: str, domain: str = None, **variables):
+def pgettext(context: str, string: str, domain: Optional[str] = None, **variables):
     """Like :meth:`gettext` but with a context."""
     t = get_translations(domain)
     return t.upgettext(context, string) % variables
 
 
 def npgettext(
-    context: str, singular: str, plural: str, num: int, domain: str = None, **variables
+    context: str,
+    singular: str,
+    plural: str,
+    num: int,
+    domain: Optional[str] = None,
+    **variables
 ):
     """Like :meth:`ngettext` but with a context."""
     variables.setdefault("num", num)
@@ -130,7 +142,7 @@ def npgettext(
     return t.unpgettext(context, singular, plural, num) % variables
 
 
-def parse_accept_header(header: str) -> t.Iterator[t.Tuple[float, str]]:
+def parse_accept_header(header: str) -> Iterator[Tuple[float, str]]:
     """Parse accept headers."""
     result = []
     for match in accept_re.finditer(header):

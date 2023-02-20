@@ -1,2 +1,2 @@
-asgi-tools      >= 0.47.9
+asgi-tools      >= 0.65.1
 babel
