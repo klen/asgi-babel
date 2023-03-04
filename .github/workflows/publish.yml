@@ -24,9 +24,8 @@ jobs:
 
     - name: Build package
       run: |
-        pip install wheel
-        python setup.py bdist_wheel
-        python setup.py sdist
+        pip install build
+        python -m build
 
     - uses: actions/upload-artifact@main
       with:
