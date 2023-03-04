@@ -1,14 +1,17 @@
 """Support cookie-encrypted sessions for ASGI applications."""
+from __future__ import annotations
+
 import re
 from contextvars import ContextVar
 from dataclasses import dataclass, field
-from typing import Awaitable, Callable, Dict, Iterator, List, Optional, Tuple
+from typing import TYPE_CHECKING, Awaitable, Callable, Dict, List, Optional, Tuple, Union
 
 from asgi_tools import Request
 from asgi_tools.middleware import BaseMiddeware
-from asgi_tools.types import TASGIApp, TASGIReceive, TASGIScope, TASGISend
-
 from babel import Locale, support
+
+if TYPE_CHECKING:
+    from asgi_tools.types import TASGIApp, TASGIReceive, TASGIScope, TASGISend
 
 __version__ = "0.8.2"
 __license__ = "MIT"
@@ -25,8 +28,11 @@ __all__ = (
 )
 
 
-current_locale = ContextVar("locale", default=None)
+current_locale = ContextVar[Optional[Locale]]("locale", default=None)
 BABEL = None
+
+class BabelMiddlewareError(RuntimeError):
+    """Base class for BabelMiddleware errors."""
 
 
 async def select_locale_by_request(request: Request) -> Optional[str]:
@@ -49,19 +55,19 @@ class BabelMiddleware(BaseMiddeware):
     domain: str = "messages"
     locales_dirs: List[str] = field(default_factory=lambda: ["locales"])
     locale_selector: Callable[[Request], Awaitable[Optional[str]]] = field(
-        repr=False, default=select_locale_by_request
+        repr=False, default=select_locale_by_request,
     )
 
     translations: Dict[Tuple[str, str], support.Translations] = field(
-        init=False, repr=False, default_factory=lambda: {}
+        init=False, repr=False, default_factory=lambda: {},
     )
 
     def __post_init__(self):
-        global BABEL
+        global BABEL # noqa:
         BABEL = self
 
     async def __process__(
-        self, scope: TASGIScope, receive: TASGIReceive, send: TASGISend
+        self, scope: TASGIScope, receive: TASGIReceive, send: TASGISend,
     ):
         """Load/save the sessions."""
         if isinstance(scope, Request):
@@ -77,21 +83,21 @@ class BabelMiddleware(BaseMiddeware):
 
 
 def get_translations(
-    domain: Optional[str] = None, locale: Optional[Locale] = None
-) -> support.Translations:
+    domain: Optional[str] = None, locale: Optional[Locale] = None,
+) -> Union[support.Translations, support.NullTranslations]:
     """Load and cache translations."""
     if BABEL is None:
-        raise RuntimeError("BabelMiddleware is not inited.")
+        raise BabelMiddlewareError
 
     locale = locale or current_locale.get()
-    if not locale:
+    if locale is None:
         return support.NullTranslations()
 
     domain = domain or BABEL.domain
     if (domain, locale.language) not in BABEL.translations:
         translations = None
         for path in reversed(BABEL.locales_dirs):
-            trans = support.Translations.load(path, locales=locale, domain=domain)
+            trans = support.Translations.load(path, locales=str(locale), domain=domain)
             if translations:
                 translations._catalog.update(trans._catalog)
             else:
@@ -109,7 +115,7 @@ def gettext(string: str, domain: Optional[str] = None, **variables):
 
 
 def ngettext(
-    singular: str, plural: str, num: int, domain: Optional[str] = None, **variables
+    singular: str, plural: str, num: int, domain: Optional[str] = None, **variables,
 ):
     """Translate a string wity the current locale.
 
@@ -134,7 +140,7 @@ def npgettext(
     plural: str,
     num: int,
     domain: Optional[str] = None,
-    **variables
+    **variables,
 ):
     """Like :meth:`ngettext` but with a context."""
     variables.setdefault("num", num)
@@ -142,7 +148,7 @@ def npgettext(
     return t.unpgettext(context, singular, plural, num) % variables
 
 
-def parse_accept_header(header: str) -> Iterator[Tuple[float, str]]:
+def parse_accept_header(header: str) -> List[Tuple[float, str]]:
     """Parse accept headers."""
     result = []
     for match in accept_re.finditer(header):
@@ -156,7 +162,7 @@ def parse_accept_header(header: str) -> Iterator[Tuple[float, str]]:
             continue
         result.append((quality, match.group(1)))
 
-    return reversed(sorted(result))
+    return sorted(result, reverse=True)
 
 
 locale_delim_re = re.compile(r"[_-]")

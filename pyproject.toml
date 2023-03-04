@@ -1,0 +1,88 @@
+[project]
+name = "asgi-babel"
+version = "0.8.2"
+description = "Internationalization (i18n) support for ASGI applications"
+readme = "README.rst"
+requires-python = ">=3.7"
+license = {"text" = "MIT License"}
+authors = [{ name = "Kirill Klenov", email = "horneds@gmail.com" }]
+keywords = ["locale", "i18n", "l10n", "babel", "gettext", "translation", "asyncio", "trio", "asgi"]
+classifiers = [
+  "Topic :: Software Development :: Internationalization",
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: Implementation :: PyPy",
+  "Programming Language :: Cython",
+  "Topic :: Internet :: WWW/HTTP",
+  "Framework :: AsyncIO",
+  "Framework :: Trio",
+]
+dependencies = [
+  "asgi-tools >= 0.71.0",
+  "babel",
+]
+
+[project.urls]
+homepage = "https://github.com/klen/asgi-babel"
+repository = "https://github.com/klen/asgi-babel"
+
+[project.optional-dependencies]
+tests = [
+  "pytest",
+  "pytest-aio[curio,trio] >= 1.1.0",
+  "pytest-mypy; implementation_name == 'cpython'",
+  "ruff",
+]
+example = ["uvicorn"]
+dev = [
+  "bump2version", "refurb; python_version >= '3.9'",
+  "tox", "pre-commit"]
+
+[tool.setuptools]
+packages = ['asgi_babel']
+
+[tool.setuptools.package-data]
+asgi_babel = ["py.typed"]
+
+[tool.pytest.ini_options]
+addopts = "-xsv --mypy"
+
+[tool.mypy]
+packages = ["asgi_babel"]
+ignore_missing_imports = true
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py37,py38,py39,py310,py311,pypy39
+
+[testenv]
+deps = -e .[tests]
+commands =
+        mypy
+	pytest tests
+
+[testenv:pypy39]
+deps = -e .[tests]
+commands =
+	pytest tests
+"""
+
+[tool.ruff]
+fix = true
+line-length = 100
+target-version = "py38"
+exclude = [".venv", "docs", "examples"]
+select = ["ALL"]
+ignore = ["D", "UP", "ANN", "DJ", "EM", "RSE", "SLF", "S101", "PLR2004"]
+
+[tool.ruff.isort]
+required-imports = ["from __future__ import annotations"]

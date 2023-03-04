@@ -2,15 +2,15 @@ VIRTUAL_ENV 	?= env
 
 all: $(VIRTUAL_ENV)
 
-$(VIRTUAL_ENV): setup.cfg
+$(VIRTUAL_ENV): pyproject.toml
 	@[ -d $(VIRTUAL_ENV) ] || python -m venv $(VIRTUAL_ENV)
-	@$(VIRTUAL_ENV)/bin/pip install -e .[tests,build,example]
+	@$(VIRTUAL_ENV)/bin/pip install -e .[tests,dev,example]
 	@touch $(VIRTUAL_ENV)
 
 VERSION	?= minor
 
 .PHONY: version
-version:
+version: $(VIRTUAL_ENV)
 	$(VIRTUAL_ENV)/bin/bump2version $(VERSION)
 	git checkout master
 	git pull
