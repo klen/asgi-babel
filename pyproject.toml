@@ -1,6 +1,6 @@
 [project]
 name = "asgi-babel"
-version = "0.8.8"
+version = "0.8.9"
 description = "Internationalization (i18n) support for ASGI applications"
 readme = "README.rst"
 requires-python = ">=3.7"
