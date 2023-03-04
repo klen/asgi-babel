@@ -63,4 +63,3 @@ messages: $(VIRTUAL_ENV)
 	# $(VIRTUAL_ENV)/bin/pybabel extract example -o locale-fr.pot
 	# $(VIRTUAL_ENV)/bin/pybabel init -l fr -d example/locales -i locale-fr.pot
 	$(VIRTUAL_ENV)/bin/pybabel compile -d example/locales
-
