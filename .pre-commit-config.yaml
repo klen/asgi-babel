@@ -20,12 +20,12 @@ repos:
   hooks:
     - id: check-types
       name: Check types
-      entry: mypy asgi_tools
+      entry: mypy
       language: system
       pass_filenames: false
     - id: check-code
       name: Refactor code
-      entry: refurb asgi_tools
+      entry: refurb asgi_babel
       language: system
       pass_filenames: false
     - id: run-tests
