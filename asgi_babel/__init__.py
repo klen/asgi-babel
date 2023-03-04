@@ -13,9 +13,6 @@ from babel import Locale, support
 if TYPE_CHECKING:
     from asgi_tools.types import TASGIApp, TASGIReceive, TASGIScope, TASGISend
 
-__version__ = "0.8.2"
-__license__ = "MIT"
-
 
 __all__ = (
     "current_locale",
