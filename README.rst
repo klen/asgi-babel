@@ -61,12 +61,12 @@ Common ASGI applications:
     app = BabelMiddleware(my_app, locales_dirs=['tests/locales'])
 
     # http GET /
-    # 
+    #
     # Current_locale is en
     # Hello World!
 
     # http GET / "accept-language: ft-CH, fr;q-0.9"
-    # 
+    #
     # Current_locale is fr
     # Bonjour le monde!
 
@@ -94,7 +94,7 @@ Usage with Curio async library
 
 The `asgi-babel` uses context variable to set current locale.  To enable the
 context variables with curio you have to run Curio_ with ``contextvars``
-support: 
+support:
 
 .. code-block:: python
 
@@ -128,7 +128,7 @@ The middleware's options with default values:
         locale_selector=asgi_babel.select_locale_by_request,
 
    )
- 
+
 
 How to extract & compile locales:
 =================================
@@ -169,4 +169,3 @@ Licensed under a `MIT license`_.
 .. _MIT license: http://opensource.org/licenses/MIT
 .. _Trio: https://trio.readthedocs.io/en/stable/
 .. _klen: https://github.com/klen
-
