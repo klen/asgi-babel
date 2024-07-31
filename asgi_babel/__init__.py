@@ -1,10 +1,11 @@
 """Support cookie-encrypted sessions for ASGI applications."""
+
 from __future__ import annotations
 
 import re
 from contextvars import ContextVar
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Awaitable, Callable, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Awaitable, Callable, Optional, Union
 
 from asgi_tools import Request
 from asgi_tools.middleware import BaseMiddeware
@@ -28,6 +29,7 @@ __all__ = (
 current_locale = ContextVar[Optional[Locale]]("locale", default=None)
 BABEL = None
 
+
 class BabelMiddlewareError(RuntimeError):
     """Base class for BabelMiddleware errors."""
 
@@ -50,21 +52,27 @@ class BabelMiddleware(BaseMiddeware):
     app: TASGIApp
     default_locale: str = "en"
     domain: str = "messages"
-    locales_dirs: List[str] = field(default_factory=lambda: ["locales"])
+    locales_dirs: list[str] = field(default_factory=lambda: ["locales"])
     locale_selector: Callable[[Request], Awaitable[Optional[str]]] = field(
-        repr=False, default=select_locale_by_request,
+        repr=False,
+        default=select_locale_by_request,
     )
 
-    translations: Dict[Tuple[str, str], support.Translations] = field(
-        init=False, repr=False, default_factory=lambda: {},
+    translations: dict[tuple[str, str], support.Translations] = field(
+        init=False,
+        repr=False,
+        default_factory=dict,
     )
 
     def __post_init__(self):
-        global BABEL # noqa:
+        global BABEL  # noqa:PLW0603
         BABEL = self
 
     async def __process__(
-        self, scope: TASGIScope, receive: TASGIReceive, send: TASGISend,
+        self,
+        scope: TASGIScope,
+        receive: TASGIReceive,
+        send: TASGISend,
     ):
         """Load/save the sessions."""
         if isinstance(scope, Request):
@@ -80,7 +88,8 @@ class BabelMiddleware(BaseMiddeware):
 
 
 def get_translations(
-    domain: Optional[str] = None, locale: Optional[Locale] = None,
+    domain: Optional[str] = None,
+    locale: Optional[Locale] = None,
 ) -> Union[support.Translations, support.NullTranslations]:
     """Load and cache translations."""
     if BABEL is None:
@@ -112,7 +121,11 @@ def gettext(string: str, domain: Optional[str] = None, **variables):
 
 
 def ngettext(
-    singular: str, plural: str, num: int, domain: Optional[str] = None, **variables,
+    singular: str,
+    plural: str,
+    num: int,
+    domain: Optional[str] = None,
+    **variables,
 ):
     """Translate a string wity the current locale.
 
@@ -145,7 +158,7 @@ def npgettext(
     return t.unpgettext(context, singular, plural, num) % variables
 
 
-def parse_accept_header(header: str) -> List[Tuple[float, str]]:
+def parse_accept_header(header: str) -> list[tuple[float, str]]:
     """Parse accept headers."""
     result = []
     for match in accept_re.finditer(header):

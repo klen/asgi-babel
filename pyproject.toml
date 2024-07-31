@@ -3,8 +3,8 @@ name = "asgi-babel"
 version = "0.9.3"
 description = "Internationalization (i18n) support for ASGI applications"
 readme = "README.rst"
-requires-python = ">=3.8"
-license = {"text" = "MIT License"}
+requires-python = ">=3.9"
+license = { "text" = "MIT License" }
 authors = [{ name = "Kirill Klenov", email = "horneds@gmail.com" }]
 keywords = ["locale", "i18n", "l10n", "babel", "gettext", "translation", "asyncio", "trio", "asgi"]
 classifiers = [
@@ -14,18 +14,15 @@ classifiers = [
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
   "Topic :: Internet :: WWW/HTTP",
   "Framework :: AsyncIO",
   "Framework :: Trio",
 ]
-dependencies = [
-  "asgi-tools >= 0.73.0",
-  "babel",
-]
+dependencies = ["asgi-tools >= 0.73.0", "babel"]
 
 [project.urls]
 homepage = "https://github.com/klen/asgi-babel"
@@ -39,9 +36,7 @@ tests = [
   "ruff",
 ]
 example = ["uvicorn"]
-dev = [
-  "bump2version", "refurb; python_version >= '3.9'",
-  "tox", "pre-commit"]
+dev = ["bump2version", "refurb; python_version >= '3.9'", "tox", "pre-commit"]
 
 [tool.setuptools]
 packages = ['asgi_babel']
@@ -59,7 +54,7 @@ ignore_missing_imports = true
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py38,py39,py310,py311,pypy39
+envlist = py39,py310,py311,py312,pypy39
 
 [testenv]
 deps = -e .[tests]
@@ -76,10 +71,12 @@ commands =
 [tool.ruff]
 fix = true
 line-length = 100
-target-version = "py38"
+target-version = "py39"
 exclude = [".venv", "docs", "examples"]
+
+[tool.ruff.lint]
 select = ["ALL"]
 ignore = ["D", "UP", "ANN", "DJ", "EM", "RSE", "SLF", "S101", "PLR2004"]
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 required-imports = ["from __future__ import annotations"]
