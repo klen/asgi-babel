@@ -28,7 +28,7 @@ ASGI-Babel
 Requirements
 =============
 
-- python >= 3.9
+- python >= 3.10
 
 .. _installation:
 

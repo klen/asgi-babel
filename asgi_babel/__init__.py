@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from contextvars import ContextVar
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Awaitable, Callable, Optional, Union
+from typing import TYPE_CHECKING, Awaitable, Callable
 
 from asgi_tools import Request
 from asgi_tools.middleware import BaseMiddeware
@@ -16,17 +16,17 @@ if TYPE_CHECKING:
 
 
 __all__ = (
-    "current_locale",
     "BabelMiddleware",
+    "current_locale",
     "get_translations",
     "gettext",
     "ngettext",
-    "pgettext",
     "npgettext",
+    "pgettext",
 )
 
 
-current_locale = ContextVar[Optional[Locale]]("locale", default=None)
+current_locale = ContextVar[Locale | None]("locale", default=None)
 BABEL = None
 
 
@@ -34,7 +34,7 @@ class BabelMiddlewareError(RuntimeError):
     """Base class for BabelMiddleware errors."""
 
 
-async def select_locale_by_request(request: Request) -> Optional[str]:
+async def select_locale_by_request(request: Request) -> str | None:
     """Select a locale by the given request."""
     locale_header = request.headers.get("accept-language")
     if locale_header:
@@ -53,7 +53,7 @@ class BabelMiddleware(BaseMiddeware):
     default_locale: str = "en"
     domain: str = "messages"
     locales_dirs: list[str] = field(default_factory=lambda: ["locales"])
-    locale_selector: Callable[[Request], Awaitable[Optional[str]]] = field(
+    locale_selector: Callable[[Request], Awaitable[str | None]] = field(
         repr=False,
         default=select_locale_by_request,
     )
@@ -88,9 +88,9 @@ class BabelMiddleware(BaseMiddeware):
 
 
 def get_translations(
-    domain: Optional[str] = None,
-    locale: Optional[Locale] = None,
-) -> Union[support.Translations, support.NullTranslations]:
+    domain: str | None = None,
+    locale: Locale | None = None,
+) -> support.Translations | support.NullTranslations:
     """Load and cache translations."""
     if BABEL is None:
         raise BabelMiddlewareError
@@ -114,7 +114,7 @@ def get_translations(
     return BABEL.translations[(domain, locale.language)]
 
 
-def gettext(string: str, domain: Optional[str] = None, **variables):
+def gettext(string: str, domain: str | None = None, **variables):
     """Translate a string with the current locale."""
     t = get_translations(domain)
     return t.ugettext(string) % variables
@@ -124,7 +124,7 @@ def ngettext(
     singular: str,
     plural: str,
     num: int,
-    domain: Optional[str] = None,
+    domain: str | None = None,
     **variables,
 ):
     """Translate a string wity the current locale.
@@ -138,7 +138,7 @@ def ngettext(
     return t.ungettext(singular, plural, num) % variables
 
 
-def pgettext(context: str, string: str, domain: Optional[str] = None, **variables):
+def pgettext(context: str, string: str, domain: str | None = None, **variables):
     """Like :meth:`gettext` but with a context."""
     t = get_translations(domain)
     return t.upgettext(context, string) % variables
@@ -149,7 +149,7 @@ def npgettext(
     singular: str,
     plural: str,
     num: int,
-    domain: Optional[str] = None,
+    domain: str | None = None,
     **variables,
 ):
     """Like :meth:`ngettext` but with a context."""
